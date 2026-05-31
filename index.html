@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitals — Health Tracker</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script scr="script.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+
+<div class="glow-orb-2"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">💚</div>
+      <div class="logo-text"><span>Vitals</span></div>
+    </div>
+
+    <div class="header-date" id="headerDate"></div>
+  </header>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+
+    <div class="stat-card weight">
+      <div class="stat-icon">⚖️</div>
+      <div class="stat-label">Latest Weight</div>
+      <div class="stat-value weight" id="statWeight">—</div>
+      <div class="stat-unit">kg / lbs</div>
+    </div>
+
+    <div class="stat-card steps">
+      <div class="stat-icon">👟</div>
+      <div class="stat-label">Latest Steps</div>
+      <div class="stat-value steps" id="statSteps">—</div>
+      <div class="stat-unit">steps today</div>
+    </div>
+
+    <div class="stat-card water">
+      <div class="stat-icon">💧</div>
+      <div class="stat-label">Latest Water</div>
+      <div class="stat-value water" id="statWater">—</div>
+      <div class="stat-unit">ml intake</div>
+    </div>
+
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Form -->
+    <div class="card">
+
+      <div class="card-title">Log Entry</div>
+
+      <form id="healthForm">
+
+        <div class="form-group">
+          <label>
+            <label for="dateInput">
+            <span class="label-icon">📅</span>
+            Date
+          </label>
+
+          <!-- FIXED INPUT -->
+          <input type="date" id="dateInput" required />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="label-icon">⚖️</span>
+            Weight (kg / lbs)
+          </label>
+
+          <input
+            type="number"
+            id="weightInput"
+            placeholder="e.g. 70.5"
+            step="0.1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="label-icon">👟</span>
+            Steps Taken
+          </label>
+
+          <input
+            type="number"
+            id="stepsInput"
+            placeholder="e.g. 8000"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="label-icon">💧</span>
+            Water (ml)
+          </label>
+
+          <input
+            type="number"
+            id="waterInput"
+            placeholder="e.g. 2000"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          + Add Entry
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          onclick="clearData()"
+        >
+          🗑 Clear All Data
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Chart -->
+    <div class="card chart-panel">
+
+      <div class="card-title">Trend Analysis</div>
+
+      <div class="chart-tabs">
+        <button class="tab active" onclick="switchChart('weight', this)">
+          Weight
+        </button>
+
+        <button class="tab" onclick="switchChart('steps', this)">
+          Steps
+        </button>
+
+        <button class="tab" onclick="switchChart('water', this)">
+          Water
+        </button>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="healthChart"></canvas>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- History -->
+  <div class="history-section">
+
+    <div class="history-header">
+      <div class="history-title">Entry History</div>
+
+      <div class="history-count" id="historyCount">
+        0 entries
+      </div>
+    </div>
+
+    <div class="history-table-wrap" id="historyWrap">
+
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+
+        <div class="empty-text">
+          No entries yet. Start logging your health data above.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span>✅</span>
+  <span id="toastMsg">Entry saved!</span>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
