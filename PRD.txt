@@ -1,0 +1,100 @@
+Product Requirement Document (PRD)
+Project: Vitals — Health Tracker (Comprehensive Full-Stack Specification)
+Status: Approved / Production-Ready 
+Timeline / Context: June 2026 Academic & Software Development Cycle 
+Target Stack: Node.js, Express, MySQL, Vanilla JS, Chart.js 
+1. Executive Summary & Scope
+•	Product Vision: Vitals is engineered as a secure, lightweight, single-page health tracking application. 
+•	Core Purpose: The application provides a seamless utility for users to track, modify, and monitor three foundational daily wellness metrics: body weight, daily steps, and water intake. 
+•	Architecture Strategy: The system delivers an integrated ecosystem consisting of a decoupled client-server architecture where static front-end components communicate asynchronously with an optimized backend API layer. 
+•	Project Context: This specification defines the complete end-to-end framework aligning with academic information technology execution and full-stack software development criteria. 
+2. Project Architecture & File System Mapping
+The application's structural components are cleanly divided into decoupled server and client layers within a unified workspace: 
+Layer	File Component	Core Technical Responsibility
+Backend (Server Layer)	package.json	Manages system-wide runtime dependencies including framework, database drivers, and security packages. 
+	db.js	Configures and exports the asynchronous MySQL database connection pool. 
+	auth.js	Houses Express routing, JWT generation logic, and password cryptographic operations. 
+Frontend (Client Layer)	login.html	The user-facing interface designed for account registration and session authentication. 
+	login.js	Handles client-side user actions, intercepts form submissions, and dispatches asynchronous fetch requests to backend auth endpoints. 
+	index.html	The core application dashboard incorporating metric collection forms, summary blocks, and interactive data visualization canvases. 
+3. Functional Requirements (FR)
+3.1 Authentication & Session Lifecycle Management
+•	User Registration Execution: New users can create an account through the interface on login.html by supplying an email address and a password. 
+•	Registration Data Interception: Registration submission payloads are captured asynchronously by login.js and transmitted securely to the server's registration endpoint. 
+•	Cryptographic Hashing: The backend application must dynamically salt and hash passwords using bcryptjs before any record is written to the persistent database layer. 
+•	User Authentication Verification: Upon a login attempt, the backend validates credentials against the stored records and issues a signed JSON Web Token (JWT) built with a secure server-side secret key. 
+•	Token Storage Strategy: The frontend script login.js captures the issued token and stores it locally within the browser’s localStorage or cookie space. 
+•	Client-Side Route Guarding: Active scripts embedded in the dashboard must verify token existence; if an active token is missing, the application automatically drops the view and redirects the browser to login.html. 
+•	Backend Middleware Protection: Protected backend endpoints must execute token verification middleware by validating the incoming header format: Authorization: Bearer <token>. 
+3.2 Dashboard Logging & State Persistence Engine
+•	Unified Metric Interface: The main workspace inside index.html contains a single, consolidated entry form allowing users to submit multiple health metrics simultaneously. 
+•	Date Selection Input: The logging form includes a dedicated custom calendar field that defaults dynamically to the current calendar date. 
+•	Weight Entry Field: The form provides a specialized decimal field to record body mass denominated in kilograms or pounds. 
+•	Step Tracker Input: The form provides a whole integer field to record physical steps accumulated throughout the day. 
+•	Fluid Monitor Input: The form provides a whole integer field to capture total daily water consumption measured in milliliters (ml). 
+•	Data Payload Dispatch: Form submissions compile user inputs into structured JSON blocks and transmit them to the health entry backend routes. 
+•	Upsert State Logic: The backend interceptor processes data using an UPSERT model; if a record already exists matching the authenticated user ID and target date, the row is updated; otherwise, a new record is created. 
+3.3 Analytics & Data Visualization
+•	Temporal Graph Components: The user interface in index.html embeds a dedicated graphic canvas leveraging Chart.js to illustrate a user's historical trend lines. 
+•	Metric Filter Toggling: Interactive tab controllers are exposed within the UI, allowing users to isolate and switch graph views exclusively between Weight trends, Step fluctuations, or Water consumption targets. 
+•	Asynchronous Hydration Flow: On dashboard initialization, the frontend script initiates a GET request to retrieve the user's complete history, asynchronously binding the response data to populate the visual chart canvas. 
+4. Technical Specifications & Database Schema
+4.1 System Package Manifest (package.json)
+The Node.js and Express runtime environment relies strictly on the following explicit module dependencies: 
+•	express: The underlying core web framework for routing HTTP requests. 
+•	mysql2: The driver used to manage asynchronous communications with the MySQL relational database. 
+•	bcryptjs: The cryptographic package handling password salting and hashing operations. 
+•	jsonwebtoken: The authorization tool managing stateless token creation and request signatures. 
+•	dotenv: The runtime utility that loads system configuration values from external environment files. 
+4.2 Relational Database Schema Design
+The persistent storage architecture relies on two tables managed within a MySQL instance: 
+1. Users Data Structure (users table)
+SQL
+CREATE TABLE users (
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+•	id: A unique string identifier acting as the primary key for user isolation. 
+•	email: A unique string field ensuring no two accounts use identical email addresses. 
+•	password_hash: A secure string column containing the results of the bcryptjs hashing sequence. 
+2. Health Entries Data Structure (health_entries table)
+SQL
+CREATE TABLE health_entries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    entry_date DATE NOT NULL,
+    weight DECIMAL(5,2) NULL,
+    steps INT NULL,
+    water_ml INT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY user_date_unique (user_id, entry_date)
+);
+•	user_id: A relational foreign key mapping directly back to the primary key of the users table. 
+•	ON DELETE CASCADE: A relational constraint ensuring that if a user account is removed, all matching data records are wiped systematically. 
+•	user_date_unique: A composite unique constraint applied across user_id and entry_date to prevent duplicate rows and directly support backend UPSERT behavior. 
+5. Non-Functional Requirements (NFR)
+5.1 System Performance & Infrastructure Abstraction
+•	Asynchronous Database Pooling: The system architecture inside db.js enforces the use of an asynchronous connection pool via mysql2/promise to process queries without blocking concurrent processing requests. 
+•	Strict Environment Separation: Critical credentials, database connections, port bindings, and cryptographic secret signing keys must remain entirely isolated from the codebase via .gitignore rules and are loaded strictly at runtime through dotenv utilities. 
+5.2 User Interface Styling & Accessibility
+•	Visual Aesthetics: The layout incorporates a modern, dark-mode styling paradigm featuring specialized interface highlights, glowing canvas container borders, and flat-designed interactive summary status blocks. 
+•	Layout Adaptation: Visual elements utilize fluid CSS Flexbox and CSS Grid frameworks combined with structural responsive media queries to provide layout scaling across mobile devices, tablet screens, and desktop displays. 
+6. End-to-End System Execution Flow
+The directional interaction map trace outlines the client-server interaction lifecycle across components: 
+[login.html / login.js] ---> (POST /api/auth/login) ---> [auth.js & db.js]
+                                                               |
+                                                   (Returns JWT if Verified)
+                                                               |
+                                                               v
+[index.html / script.js] <--- (Attaches Bearer JWT) <--- [Stores Token]
+         |
+         +---> (GET /api/entries) ---------> [Fetches History for Chart.js]
+         |
+         +---> (POST /api/entries) --------> [Inserts/Updates Daily Metrics]
+7. Verification, Quality Assurance & Success Criteria
+•	Data Plaintext Guardrail: The system fails inspection if any plaintext password variant is saved directly to the database storage layer. 
+•	Token Modification Security: Manual alterations made to the authorization tokens inside the browser development console must trigger a backend validation error, return a 403 Forbidden HTTP status code, and drop the client session immediately. 
+•	Data Emptiness Exception Handling: The analytics integration must catch empty or null historical records seamlessly, presenting an intuitive blank-state dashboard message instructing the user to record their initial metric entry. 
+
